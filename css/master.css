@@ -44,6 +44,21 @@
      transition: all 1s;
  }
 
+ main.destroyed{
+    background: #B9545D;
+    animation: linear 3s 1 forwards bgDestroyed;
+ }
+
+
+ @keyframes bgDestroyed {
+    0% {
+       background-size: 0;
+    }
+    100% {
+       background-size: cover;
+    }
+}
+
  #sun-or-moon {
      width: 100%;
      position: absolute;
@@ -144,6 +159,7 @@
      display: flex;
      justify-content: space-between;
      align-items: center;
+     transition: all 1s;
  }
 
  h2 {
@@ -205,8 +221,8 @@
      background-color: #B9545D;
      text-align: center;
      color: white;
-     font-size: 1.5rem;
-     transition: all .2s;
+     font-size: 3rem;
+     transition: all .1s;
  }
 
  .boom.destroy {
@@ -215,7 +231,21 @@
      left: 50%;
      transform: translate(-50%, -50%);
      z-index: 3000;
+     animation: linear .3s 1 forwards boomDestroyed;
  }
+
+
+
+ @keyframes boomDestroyed {
+    0% {
+       width: 40px;
+       height: 40px;
+    }
+    100% {
+        width: 100%;
+        height: 100%;
+    }
+}
 
  .safe {
      border: none;
@@ -245,10 +275,27 @@
      font-size: 1.5rem;
  }
 .tryAgain{
-    animation: linear .1s 5 backwards slidein;
+    animation: linear .1s 5 backwards rotateTrigger;
+}
+.lost{
+    animation: linear .07s 8 backwards lostTrigger;
 }
 
-@keyframes slidein {
+@keyframes lostTrigger {
+    0% {
+       transform: rotate(10deg);
+    }
+    50% {
+        transform: rotate(0);
+        
+    }
+    100% {
+        transform: rotate(-5deg);
+       
+    }
+}
+
+@keyframes rotateTrigger {
     0% {
        transform: rotate(5deg);
        background-color: rgb(233, 57, 57);

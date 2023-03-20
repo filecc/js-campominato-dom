@@ -91,6 +91,8 @@ function itsabomb(level, squaredRoot) {
     }
   }
 
+  // tracking the victory 
+  let clicked = 0;
   // add the possibility to add just the flag
   markBtn.addEventListener("click", () => {
     if (markMode === false) {
@@ -115,10 +117,14 @@ function itsabomb(level, squaredRoot) {
         if (!squares[i].innerHTML && !squares[i].classList.contains("marked")) {
           squares[i].classList.add("marked");
           bombsFound.push(squares[i].id);
+          clicked++;
+          console.log(clicked)
           btnCheckDisabled();
         } else {
           squares[i].classList.remove("marked");
           bombsFound.splice(bombsFound.indexOf(squares[i].id), 1);
+          clicked--;
+          console.log(clicked)
           btnCheckDisabled();
         }
         // update the remaining bombs according to the user
@@ -126,13 +132,18 @@ function itsabomb(level, squaredRoot) {
       } else {
         if (bombs.indexOf(squares[i].id) >= 0) {
           /* END OF THE GAME */
+          wrapper.classList.add('lost');
           squares[i].textContent = "💣";
           squares[i].className = "";
+          wrapper.insertBefore(createChild('div', '', ['square'], ''), document.getElementById(squares[i].id));
           wrapper.classList.add("position-relative");
           addClasses(squares[i], ["boom", "destroy", "explosion", "square"]);
-          explosion(squares[i]);
-          squares[i].innerHTML += "<br>BOOM";
+          squares[i].innerHTML += "<br>!! BOOM !!";
+          squares[i].style.border = 'none';
           btnContainer.textContent = "";
+          document.querySelector('main').classList.add('destroyed');
+          document.getElementById('sun-or-moon').classList.toggle('d-none');
+          document.getElementById('toggleContainer').classList.toggle('d-none');
           btnContainer.style.justifyContent = "center";
           const replay =  createChild("a", "replay", ["btn", "btn-danger"], "Replay");
           btnContainer.append(replay);
@@ -140,6 +151,7 @@ function itsabomb(level, squaredRoot) {
           document.querySelector("#gameHeader h2").style.display = "none";
           squares[i].removeEventListener('click', clickTheSquare, false);
         } else {
+          
           /* YOU'RE SAFE, YOU CAN CONTINUE THE GAME */
           /* GET CLICKED SQUARE POSITION ON THE GRID */
 
@@ -191,6 +203,7 @@ function itsabomb(level, squaredRoot) {
                   aroundBombs++;
                 } else {
                   safeSpot.push([newRow, newCol]);
+                  
                 }
               }
             });
@@ -238,6 +251,10 @@ function itsabomb(level, squaredRoot) {
 
           checkNearby(clickedRow, clickedCol);
         }
+          // check at everyclick if the user WINS
+          const notSafe = document.querySelectorAll('.aroundNotSafe');
+          const safe = document.querySelectorAll('.safe');
+          notSafe.length + safe.length + bombs.length === numOfSquares && theyWin();
       }
     });
   }
@@ -315,7 +332,7 @@ function itsabomb(level, squaredRoot) {
     }
   });
 
-  function explosion(element) {
+ /*  function explosion(element) {
     let id = null;
     let width = 0;
     clearInterval(id);
@@ -329,7 +346,7 @@ function itsabomb(level, squaredRoot) {
         element.style.height = width + "%";
       }
     }
-  }
+  } */
 
   function theyWin() {
     bombs.forEach((bomb) => {
@@ -346,6 +363,7 @@ function itsabomb(level, squaredRoot) {
     });
   }
   console.log(bombs)
+  
 }
 
 start();
