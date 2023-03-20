@@ -347,8 +347,8 @@ function itsabomb(level, squaredRoot) {
   } */
 
   function theyWin() {
-    document.querySelector('.replay').classList.toggle('d-none');
-    document.querySelector('h2').classList.toggle('d-none');
+    document.querySelector('.replay').classList.remove('d-none');
+    document.querySelector('h2').classList.add('d-none');
     bombs.forEach((bomb) => {
       const toApply = document.getElementById(bomb);
       toApply.className = "";
@@ -364,8 +364,8 @@ function itsabomb(level, squaredRoot) {
         square.removeEventListener('click', handler);
       }
     });
+    document.querySelector('.btnContainer').classList.add('d-none');
   }
-  console.log(bombs)
   
 }
 
