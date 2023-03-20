@@ -254,10 +254,23 @@ function itsabomb(level, squaredRoot) {
           // check at everyclick if the user WINS
           const notSafe = document.querySelectorAll('.aroundNotSafe');
           const safe = document.querySelectorAll('.safe');
-          notSafe.length + safe.length + bombs.length === numOfSquares && theyWin(clickTheSquare);
+          notSafe.length + safe.length + bombs.length === numOfSquares && theyWin();
       }
+      
     });
   }
+  
+
+/* 
+if(wins){
+            console.log('winsita')
+            squares.forEach(square => {
+              square.removeEventListener('click', clickTheSquare);
+              console.log(square)
+            });
+            
+          }
+*/
 
   /* MARK THE BOMB POSITION */
 
