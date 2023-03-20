@@ -38,7 +38,7 @@ Users should be able to:
 
 ### Links
 
-- Live Site URL: [https://filecc.github.io/js-campominato-grid/](https://filecc.github.io/js-campominato-grid/)
+- Live Site URL: [https://filecc.github.io/js-campominato-dom/](https://filecc.github.io/js-campominato-dom/)
 
 ## My process
 
