@@ -254,7 +254,7 @@ function itsabomb(level, squaredRoot) {
           // check at everyclick if the user WINS
           const notSafe = document.querySelectorAll('.aroundNotSafe');
           const safe = document.querySelectorAll('.safe');
-          notSafe.length + safe.length + bombs.length === numOfSquares && theyWin();
+          notSafe.length + safe.length + bombs.length === numOfSquares && theyWin(clickTheSquare);
       }
     });
   }
