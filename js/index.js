@@ -108,169 +108,161 @@ function itsabomb(level, squaredRoot) {
     }
   });
 
+  const handler = function (e) {
+ 
+    // check for mobile user if we want to add a flag
+    if (markMode) {
+      //add the mark if the square is empty and is not already marked
+      if (!this.innerHTML && !this.classList.contains("marked")) {
+        this.classList.add("marked");
+        bombsFound.push(this.id);
+        clicked++;
+        console.log(clicked)
+        btnCheckDisabled();
+      } else {
+        this.classList.remove("marked");
+        bombsFound.splice(bombsFound.indexOf(this.id), 1);
+        clicked--;
+        console.log(clicked)
+        btnCheckDisabled();
+      }
+      // update the remaining bombs according to the user
+      document.getElementById("bombsToFind").textContent = numOfBombs - bombsFound.length;
+    } else {
+      if (bombs.indexOf(this.id) >= 0) {
+        /* END OF THE GAME */
+        wrapper.classList.add('lost');
+        this.textContent = "💣";
+        this.className = "";
+        wrapper.insertBefore(createChild('div', '', ['square'], ''), document.getElementById(this.id));
+        wrapper.classList.add("position-relative");
+        addClasses(this, ["boom", "destroy", "explosion", "square"]);
+        this.innerHTML += "<br>!! BOOM !!";
+        this.style.border = 'none';
+        btnContainer.textContent = "";
+        document.querySelector('main').classList.add('destroyed');
+        document.getElementById('sun-or-moon').classList.toggle('d-none');
+        document.getElementById('toggleContainer').classList.toggle('d-none');
+        btnContainer.style.justifyContent = "center";
+        const replay =  document.querySelector('.replay');
+        replay.classList.toggle('d-none');
+        document.querySelector("#gameHeader h2").style.display = "none";
+        this.removeEventListener('click', handler, false);
+      } else {
+        
+        /* YOU'RE SAFE, YOU CAN CONTINUE THE GAME */
+        /* GET CLICKED SQUARE POSITION ON THE GRID */
+
+        const clickedPosition = this.id
+          .replace(/[^0-9]/g, "-")
+          .split("-");
+
+        const clickedRow = parseInt(clickedPosition[1]),
+          clickedCol = parseInt(clickedPosition[2]);
+
+        /* CHECK THE NEIBOROUGH */
+        /* THE GRID TO CHECK FOLLOW this PATTERN (example of a grid 3x3)
+                                    sq(mX-1, mY-1) sq(mX-1, mY) sq(mX-1, mY+1)
+                                    sq(mX, mY-1) *CLICKED(mXnY)* sq(mX, mY+1)
+                                    sq(mX+1, mY-1) sq(mX+1, mY) sq(mX+1, mY+1)
+                  
+                            */
+
+        // create the positions array
+        const squarePositionToCheck = [
+          [-1, -1],
+          [-1, 0],
+          [-1, 1],
+          [0, -1],
+          [0, 1],
+          [1, -1],
+          [1, 0],
+          [1, 1],
+        ];
+
+        function checkNearby(row, col) {
+          // if some of the square is a bomb let increase this counter
+          let aroundBombs = 0;
+          // an array of safe spots
+          let safeSpot = [];
+
+          // check all the position from the grid
+          squarePositionToCheck.forEach((position) => {
+            const newRow = row + position[0];
+            const newCol = col + position[1];
+            // ensure that we're not out of row or col
+            if (
+              newRow > 0 &&
+              newCol > 0 &&
+              newRow <= sqrtSquares &&
+              newCol <= sqrtSquares
+            ) {
+              if (bombs.includes(`m${newRow}n${newCol}`)) {
+                aroundBombs++;
+              } else {
+                safeSpot.push([newRow, newCol]);
+                
+              }
+            }
+          });
+
+          if (aroundBombs === 0) {
+            const idPosition = document.getElementById(`m${row}n${col}`);
+            idPosition.classList.add("safe");
+            idPosition.classList.remove("marked");
+            idPosition.textContent = " ";
+            idPosition.removeEventListener('click', handler, false);
+            if (bombsFound.includes(idPosition.id)) {
+              bombsFound.splice(bombsFound.indexOf(idPosition.id), 1);
+            }
+            document.getElementById("bombsToFind").textContent =
+              numOfBombs - bombsFound.length;
+            // if the square is safe check all the other positions and reveal them until they're 0 too
+            safeSpot.forEach((spot) => {
+              const newRow = spot[0];
+              const newCol = spot[1];
+              if (
+                !document
+                  .getElementById(`m${newRow}n${newCol}`)
+                  .classList.contains("safe")
+              ) {
+                // keep searching...
+                checkNearby(newRow, newCol);
+              }
+            });
+          } else {
+            //otherwise stop the checking
+            const checked = document.getElementById(`m${row}n${col}`);
+            checked.classList.remove("marked");
+            if (!checked.classList.contains('safe')){
+              checked.classList.add("aroundNotSafe");
+              checked.textContent = aroundBombs;
+            }
+            checked.removeEventListener('click', handler);
+            if (bombsFound.includes(checked.id)) {
+              bombsFound.splice(bombsFound.indexOf(checked.id), 1);
+            }
+            document.getElementById("bombsToFind").textContent =
+              numOfBombs - bombsFound.length;
+          }
+        }
+
+        checkNearby(clickedRow, clickedCol);
+      }
+        // check at everyclick if the user WINS
+        const notSafe = document.querySelectorAll('.aroundNotSafe');
+        const safe = document.querySelectorAll('.safe');
+        if (notSafe.length + safe.length + bombs.length === numOfSquares){
+          theyWin();
+          
+        } 
+
+    }
+  };
   /*  CHECK IF WE CLICK A BOMB */
   for (let i = 0; i < squares.length; i++) {
-    squares[i].addEventListener("click", function clickTheSquare() {
-      // check for mobile user if we want to add a flag
-      if (markMode) {
-        //add the mark if the square is empty and is not already marked
-        if (!squares[i].innerHTML && !squares[i].classList.contains("marked")) {
-          squares[i].classList.add("marked");
-          bombsFound.push(squares[i].id);
-          clicked++;
-          console.log(clicked)
-          btnCheckDisabled();
-        } else {
-          squares[i].classList.remove("marked");
-          bombsFound.splice(bombsFound.indexOf(squares[i].id), 1);
-          clicked--;
-          console.log(clicked)
-          btnCheckDisabled();
-        }
-        // update the remaining bombs according to the user
-        document.getElementById("bombsToFind").textContent = numOfBombs - bombsFound.length;
-      } else {
-        if (bombs.indexOf(squares[i].id) >= 0) {
-          /* END OF THE GAME */
-          wrapper.classList.add('lost');
-          squares[i].textContent = "💣";
-          squares[i].className = "";
-          wrapper.insertBefore(createChild('div', '', ['square'], ''), document.getElementById(squares[i].id));
-          wrapper.classList.add("position-relative");
-          addClasses(squares[i], ["boom", "destroy", "explosion", "square"]);
-          squares[i].innerHTML += "<br>!! BOOM !!";
-          squares[i].style.border = 'none';
-          btnContainer.textContent = "";
-          document.querySelector('main').classList.add('destroyed');
-          document.getElementById('sun-or-moon').classList.toggle('d-none');
-          document.getElementById('toggleContainer').classList.toggle('d-none');
-          btnContainer.style.justifyContent = "center";
-          const replay =  createChild("a", "replay", ["btn", "btn-danger"], "Replay");
-          btnContainer.append(replay);
-          replay.setAttribute("href", "./index.html");
-          document.querySelector("#gameHeader h2").style.display = "none";
-          squares[i].removeEventListener('click', clickTheSquare, false);
-        } else {
-          
-          /* YOU'RE SAFE, YOU CAN CONTINUE THE GAME */
-          /* GET CLICKED SQUARE POSITION ON THE GRID */
-
-          const clickedPosition = squares[i].id
-            .replace(/[^0-9]/g, "-")
-            .split("-");
-
-          const clickedRow = parseInt(clickedPosition[1]),
-            clickedCol = parseInt(clickedPosition[2]);
-
-          /* CHECK THE NEIBOROUGH */
-          /* THE GRID TO CHECK FOLLOW THIS PATTERN (example of a grid 3x3)
-                                      sq(mX-1, mY-1) sq(mX-1, mY) sq(mX-1, mY+1)
-                                      sq(mX, mY-1) *CLICKED(mXnY)* sq(mX, mY+1)
-                                      sq(mX+1, mY-1) sq(mX+1, mY) sq(mX+1, mY+1)
-                    
-                              */
-
-          // create the positions array
-          const squarePositionToCheck = [
-            [-1, -1],
-            [-1, 0],
-            [-1, 1],
-            [0, -1],
-            [0, 1],
-            [1, -1],
-            [1, 0],
-            [1, 1],
-          ];
-
-          function checkNearby(row, col) {
-            // if some of the square is a bomb let increase this counter
-            let aroundBombs = 0;
-            // an array of safe spots
-            let safeSpot = [];
-
-            // check all the position from the grid
-            squarePositionToCheck.forEach((position) => {
-              const newRow = row + position[0];
-              const newCol = col + position[1];
-              // ensure that we're not out of row or col
-              if (
-                newRow > 0 &&
-                newCol > 0 &&
-                newRow <= sqrtSquares &&
-                newCol <= sqrtSquares
-              ) {
-                if (bombs.includes(`m${newRow}n${newCol}`)) {
-                  aroundBombs++;
-                } else {
-                  safeSpot.push([newRow, newCol]);
-                  
-                }
-              }
-            });
-
-            if (aroundBombs === 0) {
-              const idPosition = document.getElementById(`m${row}n${col}`);
-              idPosition.classList.add("safe");
-              idPosition.classList.remove("marked");
-              idPosition.textContent = " ";
-              idPosition.removeEventListener('click', clickTheSquare, false);
-              if (bombsFound.includes(idPosition.id)) {
-                bombsFound.splice(bombsFound.indexOf(idPosition.id), 1);
-              }
-              document.getElementById("bombsToFind").textContent =
-                numOfBombs - bombsFound.length;
-              // if the square is safe check all the other positions and reveal them until they're 0 too
-              safeSpot.forEach((spot) => {
-                const newRow = spot[0];
-                const newCol = spot[1];
-                if (
-                  !document
-                    .getElementById(`m${newRow}n${newCol}`)
-                    .classList.contains("safe")
-                ) {
-                  // keep searching...
-                  checkNearby(newRow, newCol);
-                }
-              });
-            } else {
-              //otherwise stop the checking
-              const checked = document.getElementById(`m${row}n${col}`);
-              checked.classList.remove("marked");
-              if (!checked.classList.contains('safe')){
-                checked.classList.add("aroundNotSafe");
-                checked.textContent = aroundBombs;
-              }
-              checked.removeEventListener('click', clickTheSquare);
-              if (bombsFound.includes(checked.id)) {
-                bombsFound.splice(bombsFound.indexOf(checked.id), 1);
-              }
-              document.getElementById("bombsToFind").textContent =
-                numOfBombs - bombsFound.length;
-            }
-          }
-
-          checkNearby(clickedRow, clickedCol);
-        }
-          // check at everyclick if the user WINS
-          const notSafe = document.querySelectorAll('.aroundNotSafe');
-          const safe = document.querySelectorAll('.safe');
-          notSafe.length + safe.length + bombs.length === numOfSquares && theyWin();
-      }
-      
-    });
+    squares[i].addEventListener("click", handler);
   }
-  
-
-/* 
-if(wins){
-            console.log('winsita')
-            squares.forEach(square => {
-              square.removeEventListener('click', clickTheSquare);
-              console.log(square)
-            });
-            
-          }
-*/
 
   /* MARK THE BOMB POSITION */
 
@@ -331,14 +323,7 @@ if(wins){
         theyWin();
         wins = true;
 
-        btnContainer.innerHTML = "";
-        btnContainer.style.justifyContent = "center";
-        btnContainer.append(
-          createChild("a", "replay", ["btn", "btn-danger"], "Replay")
-        );
-        const replay = document.getElementById("replay");
-        replay.setAttribute("href", "./index.html");
-        document.querySelector("#gameHeader h2").style.display = "none";
+        
       } else {
         btnCheck.classList.add("tryAgain");
       }
@@ -362,16 +347,21 @@ if(wins){
   } */
 
   function theyWin() {
+    document.querySelector('.replay').classList.toggle('d-none');
+    document.querySelector('h2').classList.toggle('d-none');
     bombs.forEach((bomb) => {
       const toApply = document.getElementById(bomb);
       toApply.className = "";
       addClasses(toApply, ["square", "flower"]);
+      toApply.removeEventListener('click', handler);
     });
+
     squares.forEach((square) => {
       if (!bombs.includes(square.id)) {
         square.className = "";
         square.textContent = "";
         addClasses(square, ["square", "safe"]);
+        square.removeEventListener('click', handler);
       }
     });
   }
