@@ -1,4 +1,4 @@
-# Boolean Academy - Train Ticket Form
+# Boolean Academy
 
 This is a solution to the exercise n. 23 of Boolean Academy. Mine Sweeper!
 
